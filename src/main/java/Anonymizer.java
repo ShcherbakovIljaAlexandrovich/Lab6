@@ -34,7 +34,7 @@ public class Anonymizer {
         ActorSystem system = ActorSystem.create("routes");
         configStorageActor = system.actorOf(Props.create(ConfigStorageActor.class));
         initZooKeeper();
-        final Http http = Http.get(system);
+        http = Http.get(system);
         final ActorMaterializer materializer =
                 ActorMaterializer.create(system);
         final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow =
