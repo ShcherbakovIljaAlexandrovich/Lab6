@@ -79,6 +79,7 @@ public class Anonymizer {
                     byte[] port = keeper.getData("/servers/" + s, false, null);
                     newServers.add(new String(port));
                 }
+                configStorageActor.tell(new RefreshServersMessage(newServers), ActorRef.noSender());
             } catch (KeeperException | InterruptedException e) {
                 e.printStackTrace();
             }

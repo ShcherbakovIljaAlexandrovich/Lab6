@@ -22,7 +22,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a132fe5-d8ef-4dfc-af1b-091e3b89aa34" name="Default Changelist" comment="" />
+    <list default="true" id="1a132fe5-d8ef-4dfc-af1b-091e3b89aa34" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/Anonymizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Anonymizer.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
