@@ -16,6 +16,7 @@ import java.util.concurrent.CompletionStage;
 
 public class Anonymizer {
     public static Http http;
+    public static 
 
     public static void main(String[] args) throws IOException {
         System.out.println("start!");
@@ -24,7 +25,8 @@ public class Anonymizer {
         final Http http = Http.get(system);
         final ActorMaterializer materializer =
                 ActorMaterializer.create(system);
-        final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = createFlow(materializer, configStorageActor);
+        final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow =
+                createRoute(system, configStorageActor).flow(system, materializer);
         final CompletionStage<ServerBinding> binding = http.bindAndHandle(
                 routeFlow,
                 ConnectHttp.toHost("localhost", 8080),
@@ -41,5 +43,5 @@ public class Anonymizer {
         return http.singleRequest(HttpRequest.create(url));
     }
 
-    public static Route
+    public static Route createRoute()
 }
