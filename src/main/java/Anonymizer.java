@@ -11,9 +11,7 @@ import akka.http.javadsl.server.Route;
 import akka.pattern.Patterns;
 import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Flow;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -27,9 +25,12 @@ public class Anonymizer {
     public static ActorRef configStorageActor;
     private static final Duration timeout = Duration.ofSeconds(5);
     public static ZooKeeper keeper;
+    private static int PORT;
+    public static final String zookeeperConnectString  = "localhost:28015";
 
     public static void main(String[] args) throws IOException {
         System.out.println("start!");
+        PORT = Integer.parseInt(args[0]);
         ActorSystem system = ActorSystem.create("routes");
         configStorageActor = system.actorOf(Props.create(ConfigStorageActor.class));
         final Http http = Http.get(system);
@@ -39,7 +40,7 @@ public class Anonymizer {
                 createRoute().flow(system, materializer);
         final CompletionStage<ServerBinding> binding = http.bindAndHandle(
                 routeFlow,
-                ConnectHttp.toHost("localhost", 8080),
+                ConnectHttp.toHost("localhost", PORT),
                 materializer
         );
         System.out.println("Server online at http://localhost:8080/\nPress RETURN to stop...");
@@ -61,8 +62,9 @@ public class Anonymizer {
                             return completeWithFuture(fetch(url));
                         }
                         return completeWithFuture(Patterns.ask(configStorageActor, new GetNextServer(), timeout)
-                                .thenApply(nextServer -> (String)nextServer)
-                                .thenCompose(nextServer -> fetch(nextServer + "&count=" + count)));
+                                .thenApply(nextPort -> (String)nextPort)
+                                .thenCompose(nextPort -> fetch(String.format(
+                                        "http://localhost:%s?url=%s&count=%d", nextPort, url, Integer.parseInt(count) - 1))));
                     }))));
     }
 
@@ -73,8 +75,8 @@ public class Anonymizer {
             ArrayList<String> newServers = new ArrayList<>();
             try {
                 for (String s: keeper.getChildren("/servers", false, null)) {
-                    byte[] url = keeper.getData("/servers/" + s, false, null);
-                    newServers.add(new String(url));
+                    byte[] port = keeper.getData("/servers/" + s, false, null);
+                    newServers.add(new String(port));
                 }
             } catch (KeeperException | InterruptedException e) {
                 e.printStackTrace();
@@ -82,7 +84,10 @@ public class Anonymizer {
         }
     };
 
-    public static void initZooKeeper() {
-        
+    public static void initZooKeeper() throws IOException, KeeperException, InterruptedException {
+        keeper = new ZooKeeper(zookeeperConnectString, (int)timeout.getSeconds() * 1000, watcher);
+        keeper.create("/servers/" + PORT, (PORT+"").getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+        WatchedEvent event = new WatchedEvent(Watcher.Event.EventType.NodeCreated, Watcher.Event.KeeperState.SyncConnected, "");
+        watcher.process(event);
     }
 }
