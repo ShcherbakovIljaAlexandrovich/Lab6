@@ -28,11 +28,12 @@ public class Anonymizer {
     private static int PORT;
     public static final String zookeeperConnectString  = "localhost:28015";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, KeeperException, InterruptedException {
         System.out.println("start!");
         PORT = Integer.parseInt(args[0]);
         ActorSystem system = ActorSystem.create("routes");
         configStorageActor = system.actorOf(Props.create(ConfigStorageActor.class));
+        initZooKeeper();
         final Http http = Http.get(system);
         final ActorMaterializer materializer =
                 ActorMaterializer.create(system);
@@ -43,7 +44,7 @@ public class Anonymizer {
                 ConnectHttp.toHost("localhost", PORT),
                 materializer
         );
-        System.out.println("Server online at http://localhost:8080/\nPress RETURN to stop...");
+        System.out.println("Server online\nPress RETURN to stop...");
         System.in.read();
         binding
                 .thenCompose(ServerBinding::unbind)
