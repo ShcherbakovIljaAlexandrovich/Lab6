@@ -17,7 +17,7 @@ public class Anonymizer {
     public static void main(String[] args) throws IOException {
         System.out.println("start!");
         ActorSystem system = ActorSystem.create("routes");
-        ActorRef cachingActor = system.actorOf(Props.create(CachingActor.class));
+        ActorRef configStorageActor = system.actorOf(Props.create(ConfigStorageActor.class));
         final Http http = Http.get(system);
         final ActorMaterializer materializer =
                 ActorMaterializer.create(system);
