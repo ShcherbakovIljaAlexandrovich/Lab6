@@ -87,6 +87,7 @@ public class Anonymizer {
 
     public static void initZooKeeper() throws IOException, KeeperException, InterruptedException {
         keeper = new ZooKeeper(zookeeperConnectString, (int)timeout.getSeconds() * 1000, watcher);
+        System.out.println("Creating server on port " + PORT);
         keeper.create("/servers/" + PORT, (PORT+"").getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
         WatchedEvent event = new WatchedEvent(Watcher.Event.EventType.NodeCreated, Watcher.Event.KeeperState.SyncConnected, "");
         watcher.process(event);
